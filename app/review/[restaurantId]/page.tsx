@@ -24,6 +24,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
   const [recommends, setRecommends] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [restaurantName, setRestaurantName] = useState('');
 
   useEffect(() => {
@@ -61,7 +62,10 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
       return;
     }
 
-    router.push(`/restaurant/${restaurantId}`);
+    setSuccess(true);
+    setTimeout(() => {
+      router.push(`/restaurant/${restaurantId}`);
+    }, 1500);
   };
 
   const dynamicHeading = getDynamicHeading(rating);
@@ -69,12 +73,19 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
 
   return (
     <div className="min-h-screen bg-white">
-      <Header title="Zomato Lite" />
+      <Header title="Zomato Lite" homeLink />
 
       <main className="max-w-[560px] mx-auto px-4 py-6 pb-28">
         <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-6">
           <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">{dynamicHeading}</h1>
           <p className="text-[#6b6b6b] mb-6">Reviewing <span className="font-medium text-[#1a1a1a]">{restaurantName || 'Loading…'}</span></p>
+
+          {success && (
+            <div className="mb-5 p-4 bg-[#dcfce7] border border-[#bbf7d0] rounded-xl text-[#16a34a] text-sm text-center" role="status">
+              <p className="font-semibold">Thank you!</p>
+              <p>Your review has been submitted.</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 p-4 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-[#e23744] text-sm" role="alert">
@@ -82,7 +93,8 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          {!success && (
+            <form onSubmit={handleSubmit}>
             <fieldset className="mb-7">
               <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Overall rating</legend>
               <StarPicker
@@ -146,6 +158,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
               {submitting ? 'Submitting…' : 'Submit your feedback'}
             </Button>
           </form>
+        )}
         </div>
       </main>
     </div>

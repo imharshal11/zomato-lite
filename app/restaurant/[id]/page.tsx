@@ -90,7 +90,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header title="Zomato Lite" />
+      <Header title="Zomato Lite" backHref="/restaurants" backLabel="Restaurants" homeLink />
 
       <main className="max-w-[560px] mx-auto px-4 pb-28 flex-1">
         <RestaurantHero

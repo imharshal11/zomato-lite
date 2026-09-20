@@ -7,6 +7,7 @@ export interface HeaderProps {
   backHref?: string;
   backLabel?: string;
   showDivider?: boolean;
+  homeLink?: boolean;
 }
 
 export const Header: FC<HeaderProps> = ({
@@ -15,6 +16,7 @@ export const Header: FC<HeaderProps> = ({
   backHref,
   backLabel = 'Back',
   showDivider = true,
+  homeLink = false,
 }) => (
   <header className={`sticky top-0 z-40 bg-white ${showDivider ? 'border-b border-[#f1f0eb]' : ''} shadow-sm`}>
     <div className="max-w-[560px] mx-auto px-4 py-3">
@@ -24,13 +26,34 @@ export const Header: FC<HeaderProps> = ({
           className="flex items-center justify-between"
         >
           <span className="text-sm text-[#e23744] font-medium hover:underline">{backLabel}</span>
-          <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
+          {homeLink ? (
+            <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
+              {title}
+            </Link>
+          ) : (
+            <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
+          )}
+        </Link>
+      ) : homeLink ? (
+        <Link href="/" className="flex flex-col gap-1">
+          <span className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">{title}</span>
+          {subtitle && <span className="text-sm text-[#6b6b6b]">{subtitle}</span>}
         </Link>
       ) : subtitle ? (
         <div className="flex flex-col gap-1">
-          <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
+          {homeLink ? (
+            <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
+              {title}
+            </Link>
+          ) : (
+            <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
+          )}
           <span className="text-sm text-[#6b6b6b]">{subtitle}</span>
         </div>
+      ) : homeLink ? (
+        <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
+          {title}
+        </Link>
       ) : (
         <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
       )}

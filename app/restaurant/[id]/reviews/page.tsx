@@ -97,7 +97,7 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header title="Zomato Lite" backHref={`/restaurant/${id}`} backLabel="Back to restaurant" />
+      <Header title="Zomato Lite" backHref={`/restaurant/${id}`} backLabel="Back to restaurant" homeLink />
 
       <main className="max-w-[560px] mx-auto px-4 py-6 pb-12 flex-1">
         <RestaurantHero
