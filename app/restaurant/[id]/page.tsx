@@ -79,11 +79,17 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   };
 }
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, size = 'md', filledColor = '#e84d1f', emptyColor = '#d1d5db' }: { 
+  rating: number; 
+  size?: 'sm' | 'md' | 'lg';
+  filledColor?: string;
+  emptyColor?: string;
+}) {
+  const sizes = { sm: 'text-sm', md: 'text-lg', lg: 'text-2xl' };
   return (
     <span className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((star) => (
-        <span key={star} className="text-[#d4a843] text-lg">
+        <span key={star} className={sizes[size]} style={{ color: star <= rating ? filledColor : emptyColor }}>
           {star <= rating ? '★' : '☆'}
         </span>
       ))}
@@ -99,24 +105,15 @@ function ReviewCard({ review, isLatest = false }: { review: Review; isLatest?: b
   });
 
   return (
-    <article
-      className={`p-6 rounded-xl border ${
-        isLatest
-          ? 'bg-[#fffbf0] border-[#d4a843] ring-1 ring-[#d4a843]'
-          : 'bg-white border-[#e8e4dd]'
-      }`}
-    >
+    <article className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
       {isLatest && (
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-[#b8860b]">
-          <span className="relative">
-            <span className="absolute -inset-1 bg-[#d4a843] rounded-full opacity-10"></span>
-            Latest review
-          </span>
+        <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef3f0] text-sm font-semibold text-[#e84d1f]">
+          <span className="relative">Latest review</span>
         </div>
       )}
       <div className="flex items-baseline gap-3 mb-2">
-        <StarRating rating={review.rating} />
-        <time className="text-sm text-[#6b635a]">{date}</time>
+        <StarRating rating={review.rating} size="md" />
+        <time className="text-sm text-[#6b6b6b]">{date}</time>
       </div>
       <p className="text-[#1a1a1a] leading-relaxed whitespace-pre-wrap">{review.comment}</p>
     </article>
@@ -130,33 +127,47 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
   if (!data) notFound();
 
   return (
-    <main className="min-h-screen bg-[#faf9f6]">
-      <div className="max-w-[560px] mx-auto px-4 py-12">
-        <header className="mb-10">
-          <h1 className="text-3xl font-normal text-[#1a1a1a]">{data.name}</h1>
-          <p className="mt-1 text-[#6b635a]">{data.cuisine} · {data.area}</p>
-        </header>
+    <div className="min-h-screen bg-white">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-[#f1f0eb] shadow-sm">
+        <div className="max-w-[560px] mx-auto px-4 py-3 flex items-center justify-between">
+          <span className="text-xl font-bold text-[#e84d1f] tracking-tight">Zomato Lite</span>
+        </div>
+      </header>
 
-        <section className="mb-10" aria-label="Overall rating">
-          <div className="flex items-baseline gap-4">
-            <div className="text-6xl font-light text-[#1a1a1a] tabular-nums">
-              {data.averageRating ?? '—'}
-            </div>
-            <div>
-              <StarRating rating={data.averageRating ?? 0} />
-              <span className="ml-2 text-sm text-[#6b635a]">
-                {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
-              </span>
+      <main className="max-w-[560px] mx-auto px-4 pb-28">
+        {/* Restaurant Header */}
+        <section className="py-6">
+          <h1 className="text-2xl font-semibold text-[#1a1a1a]">{data.name}</h1>
+          <p className="mt-1 text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
+        </section>
+
+        {/* Overall Rating Card */}
+        <section className="mb-6" aria-label="Overall rating">
+          <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-baseline gap-3">
+                <div className="bg-[#e84d1f] text-white rounded-xl px-4 py-2">
+                  <span className="text-3xl font-bold tabular-nums">{data.averageRating ?? '—'}</span>
+                </div>
+                <div>
+                  <StarRating rating={data.averageRating ?? 0} size="lg" filledColor="#e84d1f" emptyColor="#ffd9cc" />
+                  <span className="ml-2 text-sm text-[#6b6b6b]">
+                    {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Reviews */}
         <section aria-label="Reviews">
           {data.latestReview ? (
             <>
               <ReviewCard review={data.latestReview} isLatest />
               {data.reviews.length > 0 && (
-                <div className="mt-8 space-y-4">
+                <div className="mt-4 space-y-3">
                   {data.reviews.map((review) => (
                     <ReviewCard key={review.id} review={review} />
                   ))}
@@ -164,27 +175,28 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
               )}
             </>
           ) : (
-            <div className="text-center py-16 border border-[#e8e4dd] rounded-xl bg-white">
-              <p className="text-[#6b635a] mb-4">No reviews yet</p>
+            <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-8 text-center">
+              <p className="text-[#6b6b6b] mb-4">No reviews yet</p>
               <Link
                 href={`/review/${id}`}
-                className="inline-block text-sm font-medium text-[#d4a843] hover:underline"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#e84d1f] text-white text-sm font-semibold rounded-xl hover:bg-[#d0421c] transition-colors shadow-sm hover:shadow-md"
               >
                 Be the first to review
               </Link>
             </div>
           )}
-
-          <div className="mt-10 pt-8 border-t border-[#e8e4dd]">
-            <Link
-              href={`/review/${id}`}
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#d4a843] hover:underline"
-            >
-              Write a review
-            </Link>
-          </div>
         </section>
+      </main>
+
+      {/* Sticky Write Review Button */}
+      <div className="fixed bottom-0 left-0 right-0 max-w-[560px] mx-auto px-4 pb-4 pt-2 bg-gradient-to-t from-white to-transparent z-30">
+        <Link
+          href={`/review/${id}`}
+          className="block w-full px-5 py-3.5 bg-[#e84d1f] text-white text-center font-semibold rounded-xl shadow-lg hover:bg-[#d0421c] active:scale-[0.98] transition-all duration-150"
+        >
+          Write a Review
+        </Link>
       </div>
-    </main>
+    </div>
   );
 }
