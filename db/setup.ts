@@ -17,7 +17,7 @@ async function setup() {
 
   console.log("Seeding data...");
   // Insert restaurant
-  const result = await sql`INSERT INTO restaurants (name, cuisine, area) VALUES ('Ludhiana Burrito', 'Indian', 'Sector 32') RETURNING id`;
+  const result = await sql`INSERT INTO restaurants (name, cuisine, area) VALUES ('Burritos by Protein Chef', 'Indian', 'BKC, Mumbai') RETURNING id`;
   const restaurantId = result[0].id;
   console.log("Created restaurant with id: " + restaurantId);
 

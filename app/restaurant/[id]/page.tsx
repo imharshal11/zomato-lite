@@ -4,6 +4,11 @@ import Link from 'next/link';
 
 const sql = neon(process.env.DATABASE_URL!);
 
+const ACCENT = '#e23744';
+const ACCENT_HOVER = '#c42d3a';
+const ACCENT_LIGHT = '#fef2f2';
+const ACCENT_LIGHT_BORDER = '#fecaca';
+
 interface RestaurantRow {
   name: string;
   cuisine: string;
@@ -32,6 +37,15 @@ interface RestaurantData {
   totalReviews: number;
   latestReview: Review | null;
   reviews: Review[];
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 async function getRestaurantData(id: string): Promise<RestaurantData | null> {
@@ -79,7 +93,7 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   };
 }
 
-function StarRating({ rating, size = 'md', filledColor = '#e84d1f', emptyColor = '#d1d5db' }: { 
+function StarRating({ rating, size = 'md', filledColor = ACCENT, emptyColor = '#d1d5db' }: { 
   rating: number; 
   size?: 'sm' | 'md' | 'lg';
   filledColor?: string;
@@ -107,7 +121,7 @@ function ReviewCard({ review, isLatest = false }: { review: Review; isLatest?: b
   return (
     <article className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
       {isLatest && (
-        <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef3f0] text-sm font-semibold text-[#e84d1f]">
+        <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef2f2] text-sm font-semibold text-[#e23744]">
           <span className="relative">Latest review</span>
         </div>
       )}
@@ -126,32 +140,39 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
 
   if (!data) notFound();
 
+  const initials = getInitials(data.name);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#f1f0eb] shadow-sm">
         <div className="max-w-[560px] mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#e84d1f] tracking-tight">Zomato Lite</span>
+          <span className="text-xl font-bold text-[#e23744] tracking-tight">Zomato Lite</span>
         </div>
       </header>
 
       <main className="max-w-[560px] mx-auto px-4 pb-28">
-        {/* Restaurant Header */}
-        <section className="py-6">
-          <h1 className="text-2xl font-semibold text-[#1a1a1a]">{data.name}</h1>
-          <p className="mt-1 text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
-        </section>
+        {/* Restaurant Banner/Hero */}
+        <div className="rounded-t-2xl bg-gradient-to-br from-[#e23744] to-[#c42d3a] h-44 flex items-end px-6 pb-6">
+          <span className="text-5xl font-bold text-white tracking-tight">{initials}</span>
+        </div>
 
-        {/* Overall Rating Card */}
-        <section className="mb-6" aria-label="Overall rating">
-          <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-5">
+        {/* Restaurant Info Card */}
+        <div className="bg-white rounded-b-2xl rounded-t-none border border-[#f1f0eb] border-t-0 shadow-sm">
+          <div className="px-5 py-5">
+            <h1 className="text-2xl font-semibold text-[#1a1a1a]">{data.name}</h1>
+            <p className="mt-1 text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
+          </div>
+
+          {/* Overall Rating Card */}
+          <div className="mx-5 mb-5 bg-white rounded-xl border border-[#f1f0eb] shadow-sm p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-baseline gap-3">
-                <div className="bg-[#e84d1f] text-white rounded-xl px-4 py-2">
+                <div className="bg-[#e23744] text-white rounded-xl px-4 py-2">
                   <span className="text-3xl font-bold tabular-nums">{data.averageRating ?? '—'}</span>
                 </div>
                 <div>
-                  <StarRating rating={data.averageRating ?? 0} size="lg" filledColor="#e84d1f" emptyColor="#ffd9cc" />
+                  <StarRating rating={data.averageRating ?? 0} size="lg" filledColor={ACCENT} emptyColor="#ffd9cc" />
                   <span className="ml-2 text-sm text-[#6b6b6b]">
                     {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
                   </span>
@@ -159,40 +180,40 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Reviews */}
-        <section aria-label="Reviews">
-          {data.latestReview ? (
-            <>
-              <ReviewCard review={data.latestReview} isLatest />
-              {data.reviews.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  {data.reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-8 text-center">
-              <p className="text-[#6b6b6b] mb-4">No reviews yet</p>
-              <Link
-                href={`/review/${id}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#e84d1f] text-white text-sm font-semibold rounded-xl hover:bg-[#d0421c] transition-colors shadow-sm hover:shadow-md"
-              >
-                Be the first to review
-              </Link>
-            </div>
-          )}
-        </section>
+          {/* Reviews */}
+          <div className="px-5 pb-5">
+            {data.latestReview ? (
+              <>
+                <ReviewCard review={data.latestReview} isLatest />
+                {data.reviews.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {data.reviews.map((review) => (
+                      <ReviewCard key={review.id} review={review} />
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-white rounded-xl border border-[#f1f0eb] shadow-sm p-8 text-center">
+                <p className="text-[#6b6b6b] mb-4">No reviews yet</p>
+                <Link
+                  href={`/review/${id}`}
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-[#e23744] text-white text-sm font-semibold rounded-xl hover:bg-[#c42d3a] transition-colors shadow-sm hover:shadow-md min-h-[44px]"
+                >
+                  Be the first to review
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
 
       {/* Sticky Write Review Button */}
       <div className="fixed bottom-0 left-0 right-0 max-w-[560px] mx-auto px-4 pb-4 pt-2 bg-gradient-to-t from-white to-transparent z-30">
         <Link
           href={`/review/${id}`}
-          className="block w-full px-5 py-3.5 bg-[#e84d1f] text-white text-center font-semibold rounded-xl shadow-lg hover:bg-[#d0421c] active:scale-[0.98] transition-all duration-150"
+          className="block w-full px-5 py-3.5 bg-[#e23744] text-white text-center font-semibold rounded-xl shadow-lg hover:bg-[#c42d3a] active:scale-[0.98] transition-all duration-150 min-h-[44px]"
         >
           Write a Review
         </Link>

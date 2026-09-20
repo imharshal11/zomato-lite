@@ -3,6 +3,11 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 
+const ACCENT = '#e23744';
+const ACCENT_HOVER = '#c42d3a';
+const ACCENT_LIGHT = '#fef2f2';
+const ACCENT_LIGHT_BORDER = '#fecaca';
+
 export default function ReviewPage({ params }: { params: Promise<{ restaurantId: string }> }) {
   const { restaurantId } = use(params);
   const router = useRouter();
@@ -48,7 +53,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#f1f0eb] shadow-sm">
         <div className="max-w-[560px] mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#e84d1f] tracking-tight">Zomato Lite</span>
+          <span className="text-xl font-bold text-[#e23744] tracking-tight">Zomato Lite</span>
         </div>
       </header>
 
@@ -58,7 +63,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
           <p className="text-[#6b6b6b] mb-6">Reviewing <span className="font-medium text-[#1a1a1a]">{restaurantName || 'Loading…'}</span></p>
 
           {error && (
-            <div className="mb-5 p-4 bg-[#fef3f0] border border-[#fecaca] rounded-xl text-[#e84d1f] text-sm">
+            <div className="mb-5 p-4 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-[#e23744] text-sm">
               {error}
             </div>
           )}
@@ -67,23 +72,26 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
             <fieldset className="mb-7">
               <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Rating</legend>
               <div className="flex gap-3" role="radiogroup" aria-label="Select rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    role="radio"
-                    aria-checked={rating === star}
-                    onClick={() => setRating(star)}
-                    className={`flex items-center justify-center w-14 h-14 rounded-xl border-2 transition-all duration-150 ${
-                      rating === star
-                        ? 'bg-[#fef3f0] border-[#e84d1f] text-[#e84d1f] shadow-sm shadow-[#e84d1f]/10'
-                        : 'border-[#e5e7eb] text-[#d1d5db] hover:border-[#e84d1f] hover:text-[#e84d1f] hover:bg-[#fef3f0]'
-                    }`}
-                    aria-label={`${star} star${star !== 1 ? 's' : ''}`}
-                  >
-                    ★
-                  </button>
-                ))}
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const isFilled = rating !== null && star <= rating;
+                  return (
+                    <button
+                      key={star}
+                      type="button"
+                      role="radio"
+                      aria-checked={isFilled}
+                      onClick={() => setRating(star)}
+                      className={`flex items-center justify-center w-14 h-14 rounded-xl border-2 transition-all duration-150 ${
+                        isFilled
+                          ? 'bg-[#fef2f2] border-[#e23744] text-[#e23744] shadow-sm shadow-[#e23744]/10'
+                          : 'border-[#e5e7eb] text-[#d1d5db] hover:border-[#e23744] hover:text-[#e23744] hover:bg-[#fef2f2]'
+                      }`}
+                      aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+                    >
+                      ★
+                    </button>
+                  );
+                })}
               </div>
             </fieldset>
 
@@ -96,7 +104,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={5}
-                className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e84d1f] focus:border-transparent resize-none transition-all duration-150"
+                className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:border-transparent resize-none transition-all duration-150"
                 placeholder="What did you think? Share your experience..."
               />
             </div>
@@ -104,9 +112,9 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
             <button
               type="submit"
               disabled={!rating || !comment.trim() || submitting}
-              className={`w-full px-5 py-3.5 rounded-xl font-semibold text-base transition-all duration-150 ${
+              className={`w-full px-5 py-3.5 rounded-xl font-semibold text-base transition-all duration-150 min-h-[44px] ${
                 rating && comment.trim() && !submitting
-                  ? 'bg-[#e84d1f] text-white shadow-lg shadow-[#e84d1f]/25 hover:bg-[#d0421c] hover:shadow-[#e84d1f]/35 active:scale-[0.98]'
+                  ? 'bg-[#e23744] text-white shadow-lg shadow-[#e23744]/25 hover:bg-[#c42d3a] hover:shadow-[#e23744]/35 active:scale-[0.98]'
                   : 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
               }`}
             >
