@@ -20,6 +20,7 @@ interface ReviewRow {
   rating: number;
   comment: string;
   created_at: string;
+  recommends: boolean;
 }
 
 interface Review {
@@ -27,6 +28,7 @@ interface Review {
   rating: number;
   comment: string;
   createdAt: string;
+  recommends: boolean;
 }
 
 interface RestaurantData {
@@ -60,7 +62,7 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   if (restaurant.length === 0) return null;
 
   const reviews = await sql`
-    SELECT id, rating, comment, created_at
+    SELECT id, rating, comment, created_at, recommends
     FROM reviews
     WHERE restaurant_id = ${restaurantId}
     ORDER BY created_at DESC
@@ -85,12 +87,14 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
       rating: latestReview.rating,
       comment: latestReview.comment,
       createdAt: latestReview.created_at,
+      recommends: latestReview.recommends,
     } : null,
     reviews: olderReviews.map((r) => ({
       id: r.id,
       rating: r.rating,
       comment: r.comment,
       createdAt: r.created_at,
+      recommends: r.recommends,
     })),
   };
 }
@@ -129,6 +133,14 @@ function ReviewCard({ review, isLatest = false }: { review: Review; isLatest?: b
       )}
       <div className="flex items-baseline gap-3 mb-2">
         <StarRating rating={review.rating} size="md" />
+        {review.recommends && (
+          <span className="flex items-center gap-1 text-sm text-[#16a34a]" aria-label="Recommended">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+            </svg>
+            <span>Recommended</span>
+          </span>
+        )}
         <time className="text-sm text-[#6b6b6b]">{date}</time>
       </div>
       <p className="text-[#1a1a1a] leading-relaxed whitespace-pre-wrap">{review.comment}</p>
@@ -209,6 +221,15 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
             )}
           </div>
         </div>
+        
+        {/* Static Info Footer */}
+        <footer className="mx-5 mt-8 pt-6 border-t border-[#f1f0eb]">
+          <div className="space-y-2 text-sm text-[#6b6b6b]">
+            <p>{data.cuisine} · {data.area}</p>
+            <p>Open now</p>
+            <p>Shop 4, Ground Floor, {data.area}</p>
+          </div>
+        </footer>
       </main>
 
       {/* Sticky Write Review Button */}

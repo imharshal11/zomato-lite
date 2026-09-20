@@ -13,6 +13,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
   const router = useRouter();
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState('');
+  const [recommends, setRecommends] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [restaurantName, setRestaurantName] = useState('');
@@ -34,7 +35,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
     const res = await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ restaurantId: Number(restaurantId), rating, comment }),
+      body: JSON.stringify({ restaurantId: Number(restaurantId), rating, comment, recommends }),
     });
 
     const data = await res.json();
@@ -107,6 +108,19 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
                 className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:border-transparent resize-none transition-all duration-150"
                 placeholder="What did you think? Share your experience..."
               />
+            </div>
+
+            <div className="mb-7">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={recommends}
+                  onChange={(e) => setRecommends(e.target.checked)}
+                  className="w-5 h-5 rounded border-[#e5e7eb] text-[#e23744] focus:ring-2 focus:ring-[#e23744] focus:ring-offset-2 transition-colors"
+                  aria-label="I recommend it to my friends"
+                />
+                <span className="text-sm text-[#1a1a1a]">I recommend it to my friends</span>
+              </label>
             </div>
 
             <button

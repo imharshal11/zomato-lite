@@ -11,10 +11,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { restaurantId, rating, comment } = body as {
+  const { restaurantId, rating, comment, recommends } = body as {
     restaurantId?: number;
     rating?: number;
     comment?: string;
+    recommends?: boolean;
   };
 
   if (rating === undefined || !Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -36,8 +37,8 @@ export async function POST(request: NextRequest) {
   }
 
   const result = await sql`
-    INSERT INTO reviews (restaurant_id, rating, comment)
-    VALUES (${restaurantId}, ${rating}, ${trimmedComment})
+    INSERT INTO reviews (restaurant_id, rating, comment, recommends)
+    VALUES (${restaurantId}, ${rating}, ${trimmedComment}, ${recommends ?? false})
     RETURNING id
   `;
 
