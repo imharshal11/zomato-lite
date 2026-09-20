@@ -40,8 +40,10 @@ interface RestaurantData {
 }
 
 function getInitials(name: string): string {
+  const skipWords = new Set(['by', 'the', 'of', 'and', 'a', 'an', 'in', 'on', 'at', 'to', 'for']);
   return name
     .split(' ')
+    .filter((word) => !skipWords.has(word.toLowerCase()))
     .map((word) => word[0])
     .join('')
     .toUpperCase()
