@@ -2,25 +2,24 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-
-const ACCENT = '#e23744';
-const ACCENT_HOVER = '#c42d3a';
-const ACCENT_LIGHT = '#fef2f2';
-const ACCENT_LIGHT_BORDER = '#fecaca';
-
-const RATING_LABELS: Record<number, string> = {
-  1: 'Bad',
-  2: 'Poor',
-  3: 'Okay',
-  4: 'Good',
-  5: 'Excellent',
-};
+import {
+  Header,
+  StarPicker,
+  Button,
+  Textarea,
+  Chip,
+} from '@/components';
+import { getDynamicHeading, getPlaceholder, RATING_LABELS } from '@/lib/review-utils';
 
 export default function ReviewPage({ params }: { params: Promise<{ restaurantId: string }> }) {
   const { restaurantId } = use(params);
   const router = useRouter();
   const [rating, setRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [foodRating, setFoodRating] = useState<number | null>(null);
+  const [foodHoverRating, setFoodHoverRating] = useState<number | null>(null);
+  const [packagingRating, setPackagingRating] = useState<number | null>(null);
+  const [packagingHoverRating, setPackagingHoverRating] = useState<number | null>(null);
   const [comment, setComment] = useState('');
   const [recommends, setRecommends] = useState(false);
   const [error, setError] = useState('');
@@ -44,7 +43,14 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
     const res = await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ restaurantId: Number(restaurantId), rating, comment, recommends }),
+      body: JSON.stringify({
+        restaurantId: Number(restaurantId),
+        rating,
+        comment,
+        recommends,
+        foodRating,
+        packagingRating,
+      }),
     });
 
     const data = await res.json();
@@ -58,78 +64,70 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
     router.push(`/restaurant/${restaurantId}`);
   };
 
-  const displayRating = hoverRating ?? rating;
-  const label = displayRating ? RATING_LABELS[displayRating] : 'Tap a star to rate';
+  const dynamicHeading = getDynamicHeading(rating);
+  const placeholder = getPlaceholder(rating);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#f1f0eb] shadow-sm">
-        <div className="max-w-[560px] mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#e23744] tracking-tight">Zomato Lite</span>
-        </div>
-      </header>
+      <Header title="Zomato Lite" />
 
       <main className="max-w-[560px] mx-auto px-4 py-6 pb-28">
         <div className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm p-6">
-          <h1 className="text-2xl font-semibold text-[#1a1a1a] mb-2">Write a review</h1>
+          <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">{dynamicHeading}</h1>
           <p className="text-[#6b6b6b] mb-6">Reviewing <span className="font-medium text-[#1a1a1a]">{restaurantName || 'Loading…'}</span></p>
 
           {error && (
-            <div className="mb-5 p-4 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-[#e23744] text-sm">
+            <div className="mb-5 p-4 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-[#e23744] text-sm" role="alert">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <fieldset className="mb-7">
-              <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Rating</legend>
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex gap-3" role="radiogroup" aria-label="Select rating">
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    const isFilled = rating !== null && star <= rating;
-                    const isHovered = hoverRating !== null && star <= hoverRating;
-                    const isActive = isFilled || isHovered;
-                    return (
-                      <button
-                        key={star}
-                        type="button"
-                        role="radio"
-                        aria-checked={isFilled}
-                        onClick={() => setRating(star)}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(null)}
-                        className={`flex items-center justify-center w-14 h-14 rounded-xl border-2 transition-all duration-150 ${
-                          isActive
-                            ? 'bg-[#fef2f2] border-[#e23744] text-[#e23744] shadow-sm shadow-[#e23744]/10'
-                            : 'border-[#e5e7eb] text-[#d1d5db] hover:border-[#e23744] hover:text-[#e23744] hover:bg-[#fef2f2]'
-                        }`}
-                        aria-label={`${star} star${star !== 1 ? 's' : ''}`}
-                      >
-                        ★
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-sm font-medium text-[#e23744] min-h-[1.25rem] transition-colors duration-150">
-                  {label}
-                </p>
-              </div>
+              <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Overall rating</legend>
+              <StarPicker
+                rating={rating}
+                onRatingChange={setRating}
+                onHoverChange={setHoverRating}
+                hoverRating={hoverRating}
+                label="Overall rating"
+                size="lg"
+              />
             </fieldset>
 
-            <div className="mb-7">
-              <label htmlFor="comment" className="block text-sm font-medium text-[#1a1a1a] mb-2">
-                Comment
-              </label>
-              <textarea
-                id="comment"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                rows={5}
-                className="w-full px-4 py-3.5 border border-[#e5e7eb] rounded-xl text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:border-transparent resize-none transition-all duration-150"
-                placeholder="What did you think? Share your experience..."
+            <fieldset className="mb-7">
+              <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Food (optional)</legend>
+              <StarPicker
+                rating={foodRating}
+                onRatingChange={setFoodRating}
+                onHoverChange={setFoodHoverRating}
+                hoverRating={foodHoverRating}
+                label="Food rating"
+                size="md"
               />
-            </div>
+            </fieldset>
+
+            <fieldset className="mb-7">
+              <legend className="block text-sm font-medium text-[#1a1a1a] mb-3">Packaging (optional)</legend>
+              <StarPicker
+                rating={packagingRating}
+                onRatingChange={setPackagingRating}
+                onHoverChange={setPackagingHoverRating}
+                hoverRating={packagingHoverRating}
+                label="Packaging rating"
+                size="md"
+              />
+            </fieldset>
+
+            <Textarea
+              id="comment"
+              label="Comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={5}
+              placeholder={placeholder}
+              error={error || undefined}
+            />
 
             <div className="mb-7">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -144,17 +142,9 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={!rating || !comment.trim() || submitting}
-              className={`w-full px-5 py-3.5 rounded-xl font-semibold text-base transition-all duration-150 min-h-[44px] ${
-                rating && comment.trim() && !submitting
-                  ? 'bg-[#e23744] text-white shadow-lg shadow-[#e23744]/25 hover:bg-[#c42d3a] hover:shadow-[#e23744]/35 active:scale-[0.98]'
-                  : 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
-              }`}
-            >
-              {submitting ? 'Submitting…' : 'Submit review'}
-            </button>
+            <Button type="submit" fullWidth size="lg" loading={submitting} disabled={!rating || !comment.trim()}>
+              {submitting ? 'Submitting…' : 'Submit your feedback'}
+            </Button>
           </form>
         </div>
       </main>

@@ -11,15 +11,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { restaurantId, rating, comment, recommends } = body as {
+  const { restaurantId, rating, comment, recommends, foodRating, packagingRating } = body as {
     restaurantId?: number;
     rating?: number;
     comment?: string;
     recommends?: boolean;
+    foodRating?: number;
+    packagingRating?: number;
   };
 
   if (rating === undefined || !Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: 'Rating must be an integer from 1 to 5' }, { status: 400 });
+  }
+
+  if (foodRating !== undefined && (!Number.isInteger(foodRating) || foodRating < 1 || foodRating > 5)) {
+    return NextResponse.json({ error: 'Food rating must be an integer from 1 to 5' }, { status: 400 });
+  }
+
+  if (packagingRating !== undefined && (!Number.isInteger(packagingRating) || packagingRating < 1 || packagingRating > 5)) {
+    return NextResponse.json({ error: 'Packaging rating must be an integer from 1 to 5' }, { status: 400 });
   }
 
   const trimmedComment = typeof comment === 'string' ? comment.trim() : '';
@@ -37,8 +47,8 @@ export async function POST(request: NextRequest) {
   }
 
   const result = await sql`
-    INSERT INTO reviews (restaurant_id, rating, comment, recommends)
-    VALUES (${restaurantId}, ${rating}, ${trimmedComment}, ${recommends ?? false})
+    INSERT INTO reviews (restaurant_id, rating, comment, recommends, food_rating, packaging_rating)
+    VALUES (${restaurantId}, ${rating}, ${trimmedComment}, ${recommends ?? false}, ${foodRating ?? null}, ${packagingRating ?? null})
     RETURNING id
   `;
 

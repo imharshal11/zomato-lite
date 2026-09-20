@@ -1,0 +1,3 @@
+ALTER TABLE reviews 
+ADD COLUMN IF NOT EXISTS food_rating INTEGER CHECK (food_rating BETWEEN 1 AND 5),
+ADD COLUMN IF NOT EXISTS packaging_rating INTEGER CHECK (packaging_rating BETWEEN 1 AND 5);

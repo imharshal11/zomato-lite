@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS restaurants (
-  id        SERIAL PRIMARY KEY,
-  name      TEXT NOT NULL,
-  cuisine   TEXT NOT NULL,
-  area      TEXT NOT NULL
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  cuisine     TEXT NOT NULL,
+  area        TEXT NOT NULL,
+  image_url   TEXT
 );
 
 CREATE TABLE IF NOT EXISTS reviews (
