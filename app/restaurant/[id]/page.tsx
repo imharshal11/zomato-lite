@@ -4,6 +4,19 @@ import Link from 'next/link';
 
 const sql = neon(process.env.DATABASE_URL!);
 
+interface RestaurantRow {
+  name: string;
+  cuisine: string;
+  area: string;
+}
+
+interface ReviewRow {
+  id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
 interface Review {
   id: number;
   rating: number;
@@ -27,7 +40,7 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
 
   const restaurant = await sql`
     SELECT name, cuisine, area FROM restaurants WHERE id = ${restaurantId}
-  `;
+  ` as RestaurantRow[];
   if (restaurant.length === 0) return null;
 
   const reviews = await sql`
@@ -35,11 +48,11 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
     FROM reviews
     WHERE restaurant_id = ${restaurantId}
     ORDER BY created_at DESC
-  `;
+  ` as ReviewRow[];
 
   const totalReviews = reviews.length;
   const averageRating = totalReviews > 0
-    ? Math.round((reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / totalReviews) * 10) / 10
+    ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
     : null;
 
   const latestReview = totalReviews > 0 ? reviews[0] : null;
@@ -57,7 +70,7 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
       comment: latestReview.comment,
       createdAt: latestReview.created_at,
     } : null,
-    reviews: olderReviews.map((r: { id: number; rating: number; comment: string; created_at: string }) => ({
+    reviews: olderReviews.map((r) => ({
       id: r.id,
       rating: r.rating,
       comment: r.comment,

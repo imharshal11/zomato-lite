@@ -12,12 +12,12 @@ export async function POST(request: NextRequest) {
   }
 
   const { restaurantId, rating, comment } = body as {
-    restaurantId?: unknown;
-    rating?: unknown;
-    comment?: unknown;
+    restaurantId?: number;
+    rating?: number;
+    comment?: string;
   };
 
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+  if (rating === undefined || !Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: 'Rating must be an integer from 1 to 5' }, { status: 400 });
   }
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Comment cannot be empty' }, { status: 400 });
   }
 
-  if (!Number.isInteger(restaurantId) || restaurantId < 1) {
+  if (restaurantId === undefined || !Number.isInteger(restaurantId) || restaurantId < 1) {
     return NextResponse.json({ error: 'Restaurant ID must be a positive integer' }, { status: 400 });
   }
 
