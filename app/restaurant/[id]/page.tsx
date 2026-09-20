@@ -52,6 +52,21 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   const restaurantId = parseInt(id, 10);
   if (!Number.isInteger(restaurantId) || restaurantId < 1) return null;
@@ -99,49 +114,69 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   };
 }
 
-function StarRating({ rating, size = 'md', filledColor = ACCENT, emptyColor = '#d1d5db' }: { 
+function StarRating({ rating, size = 'md', filledColor = ACCENT, emptyColor = '#d1d5db', showHalf = true }: { 
   rating: number; 
   size?: 'sm' | 'md' | 'lg';
   filledColor?: string;
   emptyColor?: string;
+  showHalf?: boolean;
 }) {
   const sizes = { sm: 'text-sm', md: 'text-lg', lg: 'text-2xl' };
+  const fullStars = Math.floor(rating);
+  const hasHalf = showHalf && rating % 1 >= 0.5;
+  
   return (
     <span className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <span key={star} className={sizes[size]} style={{ color: star <= rating ? filledColor : emptyColor }}>
-          {star <= rating ? '★' : '☆'}
-        </span>
-      ))}
+      {[1, 2, 3, 4, 5].map((star) => {
+        if (star <= fullStars) {
+          return (
+            <span key={star} className={sizes[size]} style={{ color: filledColor }}>
+              ★
+            </span>
+          );
+        }
+        if (star === fullStars + 1 && hasHalf) {
+          return (
+            <span key={star} className={sizes[size]} style={{ color: filledColor }}>
+              ½
+            </span>
+          );
+        }
+        return (
+          <span key={star} className={sizes[size]} style={{ color: emptyColor }}>
+            ☆
+          </span>
+        );
+      })}
     </span>
   );
 }
 
 function ReviewCard({ review, isLatest = false }: { review: Review; isLatest?: boolean }) {
-  const date = new Date(review.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const relativeTime = formatRelativeTime(review.createdAt);
 
   return (
-    <article className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
+    <article className="bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-md transition-shadow duration-200 p-5 relative">
       {isLatest && (
         <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef2f2] text-sm font-semibold text-[#e23744]">
           <span className="relative">Latest review</span>
         </div>
       )}
-      <div className="flex items-baseline gap-3 mb-2">
-        <StarRating rating={review.rating} size="md" />
-        {review.recommends && (
-          <span className="flex items-center gap-1 text-sm text-[#16a34a]" aria-label="Recommended">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-            </svg>
-            <span>Recommended</span>
-          </span>
-        )}
-        <time className="text-sm text-[#6b6b6b]">{date}</time>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-baseline gap-2 flex-1 min-w-0">
+          <StarRating rating={review.rating} size="md" />
+          {review.recommends && (
+            <span className="flex items-center gap-1 text-sm text-[#16a34a] whitespace-nowrap" aria-label="Recommended">
+              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+              </svg>
+              <span>Recommended</span>
+            </span>
+          )}
+        </div>
+        <time className="text-xs text-[#9ca3af] whitespace-nowrap flex-shrink-0 ml-2" dateTime={review.createdAt}>
+          {relativeTime}
+        </time>
       </div>
       <p className="text-[#1a1a1a] leading-relaxed whitespace-pre-wrap">{review.comment}</p>
     </article>
@@ -155,9 +190,11 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
   if (!data) notFound();
 
   const initials = getInitials(data.name);
+  // Hardcoded to true for now — replace with real hours logic later
+  const isOpen = true;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#f1f0eb] shadow-sm">
         <div className="max-w-[560px] mx-auto px-4 py-3 flex items-center justify-between">
@@ -165,7 +202,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
         </div>
       </header>
 
-      <main className="max-w-[560px] mx-auto px-4 pb-28">
+      <main className="max-w-[560px] mx-auto px-4 pb-28 flex-1">
         {/* Restaurant Banner/Hero */}
         <div className="rounded-t-2xl bg-gradient-to-br from-[#e23744] to-[#c42d3a] h-44 flex items-end px-6 pb-6">
           <span className="text-5xl font-bold text-white tracking-tight">{initials}</span>
@@ -174,24 +211,39 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
         {/* Restaurant Info Card */}
         <div className="bg-white rounded-b-2xl rounded-t-none border border-[#f1f0eb] border-t-0 shadow-sm">
           <div className="px-5 py-5">
-            <h1 className="text-2xl font-semibold text-[#1a1a1a]">{data.name}</h1>
-            <p className="mt-1 text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl font-semibold text-[#1a1a1a] truncate">{data.name}</h1>
+                <p className="mt-1 text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
+              </div>
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
+                isOpen
+                  ? 'bg-[#16a34a] text-white'
+                  : 'bg-[#e23744] text-white'
+              }`}>
+                {isOpen ? 'Open' : 'Closed'}
+              </span>
+            </div>
           </div>
 
           {/* Overall Rating Card */}
-          <div className="mx-5 mb-5 bg-white rounded-xl border border-[#f1f0eb] shadow-sm p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-baseline gap-3">
-                <div className="bg-[#e23744] text-white rounded-xl px-4 py-2">
-                  <span className="text-3xl font-bold tabular-nums">{data.averageRating ?? '—'}</span>
-                </div>
-                <div>
-                  <StarRating rating={data.averageRating ?? 0} size="lg" filledColor={ACCENT} emptyColor="#ffd9cc" />
-                  <span className="ml-2 text-sm text-[#6b6b6b]">
-                    {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
-                  </span>
-                </div>
+          <div className="mx-5 mb-5 bg-white rounded-xl border border-[#f1f0eb] shadow-sm p-6">
+            <div className="text-center">
+              <div className="text-5xl font-bold text-[#1a1a1a] tabular-nums leading-none">
+                {data.averageRating ?? '—'}
               </div>
+              <div className="mt-2">
+                <StarRating 
+                  rating={data.averageRating ?? 0} 
+                  size="lg" 
+                  filledColor={ACCENT} 
+                  emptyColor="#d1d5db"
+                  showHalf
+                />
+              </div>
+              <p className="mt-2 text-sm text-[#6b6b6b]">
+                {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
+              </p>
             </div>
           </div>
 
@@ -228,6 +280,11 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
             <p>{data.cuisine} · {data.area}</p>
             <p>Open now</p>
             <p>Shop 4, Ground Floor, {data.area}</p>
+          </div>
+          
+          {/* Footer Credit */}
+          <div className="mt-8 pt-4 border-t border-[#f1f0eb] text-center">
+            <p className="text-xs text-[#9ca3af]">Built by Harshal</p>
           </div>
         </footer>
       </main>
