@@ -20,43 +20,37 @@ export const Header: FC<HeaderProps> = ({
 }) => (
   <header className={`sticky top-0 z-40 bg-white ${showDivider ? 'border-b border-[#f1f0eb]' : ''} shadow-sm`}>
     <div className="max-w-[560px] mx-auto px-4 py-3">
-      {backHref ? (
-        <Link
-          href={backHref}
-          className="flex items-center justify-between"
-        >
-          <span className="text-sm text-[#e23744] font-medium hover:underline">{backLabel}</span>
-          {homeLink ? (
-            <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
+      <div className="flex items-center justify-between gap-4">
+        {/* Back link (left side) */}
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="flex items-center gap-1.5 text-sm text-[#e23744] font-medium hover:underline whitespace-nowrap flex-shrink-0 min-h-[44px] px-2"
+          >
+            ← {backLabel}
+          </Link>
+        ) : (
+          <span className="w-12 flex-shrink-0" aria-hidden="true" />
+        )}
+
+        {/* Title / Home link (center) */}
+        {homeLink ? (
+          <Link href="/" className="flex flex-col items-center gap-0.5 flex-1 text-center min-w-0">
+            <span className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity truncate">
               {title}
-            </Link>
-          ) : (
-            <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
-          )}
-        </Link>
-      ) : homeLink ? (
-        <Link href="/" className="flex flex-col gap-1">
-          <span className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">{title}</span>
-          {subtitle && <span className="text-sm text-[#6b6b6b]">{subtitle}</span>}
-        </Link>
-      ) : subtitle ? (
-        <div className="flex flex-col gap-1">
-          {homeLink ? (
-            <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
-              {title}
-            </Link>
-          ) : (
-            <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
-          )}
-          <span className="text-sm text-[#6b6b6b]">{subtitle}</span>
-        </div>
-      ) : homeLink ? (
-        <Link href="/" className="text-xl font-bold text-[#e23744] tracking-tight hover:opacity-80 transition-opacity">
-          {title}
-        </Link>
-      ) : (
-        <span className="text-xl font-bold text-[#e23744] tracking-tight">{title}</span>
-      )}
+            </span>
+            {subtitle && <span className="text-sm text-[#6b6b6b] truncate">{subtitle}</span>}
+          </Link>
+        ) : (
+          <div className="flex flex-col items-center gap-0.5 flex-1 text-center min-w-0">
+            <span className="text-xl font-bold text-[#e23744] tracking-tight truncate">{title}</span>
+            {subtitle && <span className="text-sm text-[#6b6b6b] truncate">{subtitle}</span>}
+          </div>
+        )}
+
+        {/* Spacer for alignment (right side) */}
+        <span className="w-12 flex-shrink-0" aria-hidden="true" />
+      </div>
     </div>
   </header>
 );

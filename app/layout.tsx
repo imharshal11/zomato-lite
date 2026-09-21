@@ -25,9 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col bg-white">
         <main className="flex-1">{children}</main>
-        <footer className="bg-[#0a0a0a] border-t border-[#1f1f1f] py-4">
-          <div className="max-w-[560px] mx-auto px-4 text-center">
-            <p className="text-xs text-[#9ca3af]">
+        <footer className="bg-[#0a0a0a] border-t border-[#1f1f1f] py-4 z-10 relative">
+          <div className="w-full px-4 sm:max-w-[560px] sm:mx-auto text-center">
+            <p className="text-xs sm:text-sm text-[#9ca3af]">
               All Rights Reserved &copy; 2026 | Built by Harshal
             </p>
           </div>

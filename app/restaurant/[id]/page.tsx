@@ -1,6 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import {
   Header,
   RestaurantHero,
@@ -9,9 +10,14 @@ import {
   ReviewCard,
   StatusChip,
   Button,
-  Footer,
+  Chip,
+  KpiCard,
 } from '@/components';
-import { getInitials, formatRelativeTime } from '@/lib/utils';
+import { RestaurantTabs } from './RestaurantTabs';
+import { MenuSectionClient } from './MenuSectionClient';
+import { ReviewsSectionClient } from './ReviewsSectionClient';
+import { getInitials } from '@/lib/utils';
+import { getMenuItemsGroupedByCategoryWithRatings } from '@/lib/restaurants';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -30,6 +36,13 @@ interface ReviewRow {
   recommends: boolean;
   food_rating: number | null;
   packaging_rating: number | null;
+  menu_item_id: number | null;
+}
+
+interface MenuItemInfo {
+  id: number;
+  name: string;
+  is_veg: boolean;
 }
 
 interface RestaurantData {
@@ -41,9 +54,10 @@ interface RestaurantData {
   totalReviews: number;
   latestReview: ReviewRow | null;
   reviews: ReviewRow[];
+  menuItemNames: Map<number, string>;
 }
 
-async function getRestaurantData(id: string): Promise<RestaurantData | null> {
+async function getRestaurantData(id: string) {
   const restaurantId = parseInt(id, 10);
   if (!Number.isInteger(restaurantId) || restaurantId < 1) return null;
 
@@ -53,7 +67,7 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   if (restaurant.length === 0) return null;
 
   const reviews = await sql`
-    SELECT id, rating, comment, created_at, recommends, food_rating, packaging_rating
+    SELECT id, rating, comment, created_at, recommends, food_rating, packaging_rating, menu_item_id
     FROM reviews
     WHERE restaurant_id = ${restaurantId}
     ORDER BY created_at DESC
@@ -63,6 +77,16 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
   const averageRating = totalReviews > 0
     ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
     : null;
+
+  const menuItemIds = reviews
+    .filter(r => r.menu_item_id !== null)
+    .map(r => r.menu_item_id!);
+  
+  const menuItems = menuItemIds.length > 0 ? await sql`
+    SELECT id, name, is_veg FROM menu_items WHERE id = ANY(${menuItemIds})
+  ` as MenuItemInfo[] : [];
+  
+  const menuItemNames = new Map(menuItems.map(m => [m.id, m.name]));
 
   const latestReview = totalReviews > 0 ? reviews[0] : null;
   const olderReviews = totalReviews > 1 ? reviews.slice(1) : [];
@@ -76,14 +100,37 @@ async function getRestaurantData(id: string): Promise<RestaurantData | null> {
     totalReviews,
     latestReview,
     reviews: olderReviews,
+    menuItemNames,
+    menuItems,
   };
 }
 
 export default async function RestaurantPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const data = await getRestaurantData(id);
+  const restaurantId = parseInt(id, 10);
+  const menuItemsByCategory = await getMenuItemsGroupedByCategoryWithRatings(restaurantId);
 
   if (!data) notFound();
+
+  // Convert Map to plain object with STRING keys for client component serialization
+  const menuItemNamesObj: Record<string, string> = {};
+  for (const [k, v] of data.menuItemNames) {
+    menuItemNamesObj[String(k)] = v;
+  }
+
+  // Convert menuItems array to plain objects for client component serialization
+  const menuItemsObj = data.menuItems.map(m => ({
+    id: m.id,
+    name: m.name,
+    is_veg: m.is_veg,
+  }));
+
+  // Create data object with menuItemNames as Record<string, string> for client components
+  const clientData = {
+    ...data,
+    menuItemNames: menuItemNamesObj,
+  };
 
   const initials = getInitials(data.name);
   const isOpen = true;
@@ -101,6 +148,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
           isOpen={isOpen}
         />
 
+        {/* Header Info + KPI Card - Always visible above tabs */}
         <Card className="space-y-6">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex-1 min-w-0">
@@ -110,65 +158,39 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
             <StatusChip label={isOpen ? 'Open' : 'Closed'} status={isOpen ? 'open' : 'closed'} />
           </div>
 
-          <div className="text-center py-2">
-            <div className="text-4xl font-bold text-[#1a1a1a] tabular-nums leading-none">
-              {data.averageRating ?? '—'}
-            </div>
-            <div className="mt-2">
-              <StarRating rating={data.averageRating ?? 0} size="lg" showHalf />
-            </div>
-            <p className="mt-2 text-sm text-[#6b6b6b]">
-              {data.totalReviews} review{data.totalReviews !== 1 ? 's' : ''}
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {data.latestReview ? (
-              <>
-                <ReviewCard
-                  rating={data.latestReview.rating}
-                  comment={data.latestReview.comment}
-                  createdAt={data.latestReview.created_at}
-                  recommends={data.latestReview.recommends}
-                  foodRating={data.latestReview.food_rating}
-                  packagingRating={data.latestReview.packaging_rating}
-                  isLatest
-                />
-                {data.reviews.length > 0 && (
-                  <div className="space-y-3">
-                    {data.reviews.map((review) => (
-                      <ReviewCard
-                        key={review.id}
-                        rating={review.rating}
-                        comment={review.comment}
-                        createdAt={review.created_at}
-                        recommends={review.recommends}
-                        foodRating={review.food_rating}
-                        packagingRating={review.packaging_rating}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-[#6b6b6b] mb-4">No reviews yet</p>
-                <Link href={`/review/${id}`}>
-                  <Button>Be the first to review</Button>
-                </Link>
-              </div>
-            )}
-          </div>
+          <KpiCard
+            label="Overall"
+            rating={data.averageRating}
+            reviewCount={data.totalReviews}
+            size="lg"
+            variant="primary"
+          />
         </Card>
 
-        <Footer cuisine={data.cuisine} area={data.area} />
+        {/* RestaurantTabs handles tab state and panel rendering */}
+        <RestaurantTabs
+          menuItemsByCategory={menuItemsByCategory}
+          restaurantId={restaurantId}
+          data={clientData}
+          menuItemNamesObj={menuItemNamesObj}
+          menuItems={data.menuItems}
+          id={id}
+        />
+
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-[560px] mx-auto px-4 pb-4 pt-2 bg-gradient-to-t from-white to-transparent z-30">
-        <Link href={`/review/${id}`}>
-          <Button fullWidth size="lg">Write a Review</Button>
-        </Link>
-      </div>
+      {/* FAB - Write a Review - Always visible */}
+      <Link
+        href={`/review/${id}`}
+        className="fixed bottom-6 right-4 z-40 sm:bottom-8 sm:right-6"
+        aria-label="Write a review"
+      >
+        <button className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#e23744] text-white shadow-lg shadow-[#e23744]/40 flex items-center justify-center hover:bg-[#c42d3a] hover:shadow-xl hover:shadow-[#e23744]/50 active:scale-[0.95] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:ring-offset-2">
+          <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+      </Link>
     </div>
   );
 }

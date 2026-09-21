@@ -19,8 +19,8 @@ const variantStyles = {
 };
 
 const sizeStyles = {
-  sm: 'px-2.5 py-1 text-xs',
-  md: 'px-4 py-2 text-sm',
+  sm: 'px-2.5 py-1.5 text-xs min-h-[44px]',
+  md: 'px-4 py-2.5 text-sm min-h-[44px]',
 };
 
 export const Chip: FC<ChipProps> = ({
@@ -71,6 +71,53 @@ export const StatusChip: FC<StatusChipProps> = ({ label, status, size = 'md' }) 
   return (
     <span className={`inline-flex items-center font-semibold rounded-full whitespace-nowrap ${statusStyles[status]} ${sizeStyles[size]}`}>
       {label}
+    </span>
+  );
+};
+
+export interface NewBadgeProps {
+  createdAt: string;
+  daysThreshold?: number;
+  size?: 'sm' | 'md';
+  overlay?: boolean;
+}
+
+export const NewBadge: FC<NewBadgeProps> = ({ 
+  createdAt, 
+  daysThreshold = 30,
+  size = 'sm',
+  overlay = false
+}) => {
+  const created = new Date(createdAt);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays > daysThreshold) return null;
+
+  const sizeStyles = {
+    sm: 'px-2 py-0.5 text-[10px]',
+    md: 'px-2.5 py-1 text-xs',
+  };
+
+  const baseClass = `inline-flex items-center font-semibold rounded-full bg-[#e23744] text-white ${sizeStyles[size]}`;
+  
+  if (overlay) {
+    return (
+      <span 
+        className={`${baseClass} absolute bottom-2 left-2 z-10 shadow-lg`}
+        aria-label={`New - added ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`}
+      >
+        New
+      </span>
+    );
+  }
+
+  return (
+    <span 
+      className={baseClass}
+      aria-label={`New - added ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`}
+    >
+      New
     </span>
   );
 };

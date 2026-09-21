@@ -21,7 +21,7 @@ export const SubScorePill: FC<SubScorePillProps> = ({ label, rating, count }) =>
     <div className="flex flex-col items-center gap-1 px-4 py-3 bg-white border border-[#f1f0eb] rounded-xl">
       <div className="flex items-baseline gap-1">
         <span className="text-2xl font-bold text-[#1a1a1a] tabular-nums">{rating}</span>
-        <StarRating rating={rating} size="sm" />
+        <StarRating rating={rating} size="sm" colorByRating />
       </div>
       <span className="text-xs text-[#9ca3af] uppercase tracking-wide">{label}</span>
       <span className="text-xs text-[#9ca3af]">{count} rating{count !== 1 ? 's' : ''}</span>

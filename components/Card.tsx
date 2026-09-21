@@ -1,6 +1,7 @@
 import { type FC, type ReactNode } from 'react';
 import Link from 'next/link';
 import { StarRating } from './StarRating';
+import { NewBadge } from './Chip';
 
 export interface CardProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export interface RestaurantCardProps {
   imageUrl: string | null;
   averageRating: number | null;
   totalReviews: number;
+  createdAt: string;
 }
 
 export const RestaurantCard: FC<RestaurantCardProps> = ({
@@ -53,6 +55,7 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
   imageUrl,
   averageRating,
   totalReviews,
+  createdAt,
 }) => {
   const displayImage = imageUrl || `https://placehold.co/400x300/e5e7eb/9ca3af?text=${encodeURIComponent(name)}`;
 
@@ -62,6 +65,7 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
       className="group block bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
     >
       <div className="relative h-40 w-full bg-gradient-to-br from-gray-100 to-gray-200">
+        <NewBadge createdAt={createdAt} size="sm" overlay />
         <img
           src={displayImage}
           alt=""
@@ -77,7 +81,7 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
         <div className="mt-3 flex items-center gap-2">
           {averageRating !== null ? (
             <>
-              <StarRating rating={averageRating} size="sm" />
+              <StarRating rating={averageRating} size="sm" colorByRating />
               <span className="text-sm font-semibold text-[#1a1a1a] tabular-nums">{averageRating}</span>
               <span className="text-sm text-[#9ca3af]">({totalReviews} review{totalReviews !== 1 ? 's' : ''})</span>
             </>

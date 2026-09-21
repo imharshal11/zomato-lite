@@ -8,6 +8,7 @@ export interface StarRatingProps {
   emptyColor?: string;
   showHalf?: boolean;
   ariaLabel?: string;
+  colorByRating?: boolean;
 }
 
 const sizeClasses = {
@@ -16,30 +17,44 @@ const sizeClasses = {
   lg: 'text-2xl',
 };
 
+const RATING_COLORS = {
+  low: '#dc2626',    // red for 1-2
+  mid: '#f59e0b',    // amber for 3
+  high: '#16a34a',   // green for 4-5
+};
+
+function getRatingColor(rating: number): string {
+  if (rating <= 2) return RATING_COLORS.low;
+  if (rating === 3) return RATING_COLORS.mid;
+  return RATING_COLORS.high;
+}
+
 export const StarRating: FC<StarRatingProps> = ({
   rating,
   size = 'md',
-  filledColor = '#e23744',
+  filledColor,
   emptyColor = '#d1d5db',
   showHalf = true,
   ariaLabel,
+  colorByRating = true,
 }) => {
   const fullStars = Math.floor(rating);
   const hasHalf = showHalf && rating % 1 >= 0.5;
+  const color = colorByRating ? getRatingColor(rating) : (filledColor ?? '#e23744');
 
   return (
     <span className="flex items-center gap-0.5" aria-label={ariaLabel ?? `${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((star) => {
         if (star <= fullStars) {
           return (
-            <span key={star} className={sizeClasses[size]} style={{ color: filledColor }}>
+            <span key={star} className={sizeClasses[size]} style={{ color }}>
               ★
             </span>
           );
         }
         if (star === fullStars + 1 && hasHalf) {
           return (
-            <span key={star} className={sizeClasses[size]} style={{ color: filledColor }}>
+            <span key={star} className={sizeClasses[size]} style={{ color }}>
               ½
             </span>
           );
@@ -64,7 +79,7 @@ export interface StarPickerProps {
 }
 
 const pickerSizes = {
-  sm: 'w-10 h-10 text-lg',
+  sm: 'w-11 h-11 text-lg',
   md: 'w-12 h-12 text-xl',
   lg: 'w-16 h-16 text-2xl',
 };
@@ -78,6 +93,7 @@ export const StarPicker: FC<StarPickerProps> = ({
   size = 'lg',
 }) => {
   const displayRating = hoverRating ?? rating;
+  const activeColor = displayRating ? getRatingColor(displayRating) : '#e23744';
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -86,6 +102,10 @@ export const StarPicker: FC<StarPickerProps> = ({
           const isFilled = rating !== null && star <= rating;
           const isHovered = hoverRating !== null && star <= hoverRating;
           const isActive = isFilled || isHovered;
+          const starColor = isActive ? getRatingColor(star) : '#d1d5db';
+          const borderColor = isActive ? getRatingColor(star) : '#e5e7eb';
+          const bgColor = isActive ? `${starColor}15` : 'transparent'; // 10% opacity
+          
           return (
             <button
               key={star}
@@ -95,11 +115,13 @@ export const StarPicker: FC<StarPickerProps> = ({
               onClick={() => onRatingChange(star)}
               onMouseEnter={() => onHoverChange(star)}
               onMouseLeave={() => onHoverChange(null)}
-              className={`flex items-center justify-center rounded-xl border-2 transition-all duration-150 ${
-                isActive
-                  ? 'bg-[#fef2f2] border-[#e23744] text-[#e23744] shadow-sm shadow-[#e23744]/10 scale-105'
-                  : 'border-[#e5e7eb] text-[#d1d5db] hover:border-[#e23744] hover:text-[#e23744] hover:bg-[#fef2f2] hover:scale-105'
-              } ${pickerSizes[size]}`}
+              className={`flex items-center justify-center rounded-xl border-2 transition-all duration-150 ${pickerSizes[size]}`}
+              style={{
+                color: starColor,
+                borderColor,
+                backgroundColor: isActive ? bgColor : 'transparent',
+                transform: isActive ? 'scale(1.05)' : 'scale(1)',
+              }}
               aria-label={`${star} star${star !== 1 ? 's' : ''}`}
             >
               ★
@@ -107,7 +129,7 @@ export const StarPicker: FC<StarPickerProps> = ({
           );
         })}
       </div>
-      <p className="text-sm font-medium text-[#e23744] min-h-[1.25rem] transition-colors duration-150">
+      <p className="text-sm font-medium min-h-[1.25rem] transition-colors duration-150" style={{ color: activeColor }}>
         {displayRating ? RATING_LABELS[displayRating] : 'Tap to rate'}
       </p>
     </div>

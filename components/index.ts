@@ -8,3 +8,6 @@ export { ReviewCard, type ReviewCardProps } from './ReviewCard';
 export { SubScorePill, type SubScorePillProps } from './SubScorePill';
 export { RestaurantHero, type RestaurantHeroProps } from './RestaurantHero';
 export { Footer, type FooterProps } from './Footer';
+export { KpiCard, KpiCardGrid, type KpiCardProps, type KpiCardGridProps } from './KpiCard';
+export { MenuFilters } from './MenuFilters';
+export { MenuItemCard } from './MenuItemCard';

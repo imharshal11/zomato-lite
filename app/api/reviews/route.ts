@@ -11,13 +11,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { restaurantId, rating, comment, recommends, foodRating, packagingRating } = body as {
+  const { restaurantId, rating, comment, recommends, foodRating, packagingRating, menuItemId } = body as {
     restaurantId?: number;
     rating?: number;
     comment?: string;
     recommends?: boolean;
     foodRating?: number;
     packagingRating?: number;
+    menuItemId?: number;
   };
 
   if (rating === undefined || !Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -46,9 +47,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Restaurant not found' }, { status: 400 });
   }
 
+  // Validate menuItemId belongs to the same restaurant if provided
+  if (menuItemId !== undefined && menuItemId !== null) {
+    if (!Number.isInteger(menuItemId) || menuItemId < 1) {
+      return NextResponse.json({ error: 'Menu item ID must be a positive integer' }, { status: 400 });
+    }
+    const menuItem = await sql`SELECT id FROM menu_items WHERE id = ${menuItemId} AND restaurant_id = ${restaurantId}`;
+    if (menuItem.length === 0) {
+      return NextResponse.json({ error: 'Menu item not found for this restaurant' }, { status: 400 });
+    }
+  }
+
   const result = await sql`
-    INSERT INTO reviews (restaurant_id, rating, comment, recommends, food_rating, packaging_rating)
-    VALUES (${restaurantId}, ${rating}, ${trimmedComment}, ${recommends ?? false}, ${foodRating ?? null}, ${packagingRating ?? null})
+    INSERT INTO reviews (restaurant_id, rating, comment, recommends, food_rating, packaging_rating, menu_item_id)
+    VALUES (${restaurantId}, ${rating}, ${trimmedComment}, ${recommends ?? false}, ${foodRating ?? null}, ${packagingRating ?? null}, ${menuItemId ?? null})
     RETURNING id
   `;
 

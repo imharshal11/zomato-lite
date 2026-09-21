@@ -51,13 +51,13 @@ export default function RestaurantsPageClient({ restaurants }: { restaurants: Re
 
         <div className="mb-4">
           <label htmlFor="search-restaurants" className="sr-only">Search restaurants</label>
-          <input
+<input
             id="search-restaurants"
             type="search"
             placeholder="Search restaurants..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-full text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:border-transparent transition-all duration-150"
+            className="w-full px-4 py-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-full text-[#1a1a1a] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#e23744] focus:border-transparent transition-all duration-150 min-h-[44px]"
           />
         </div>
 
