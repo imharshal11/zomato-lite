@@ -96,7 +96,21 @@ No aggregate columns are ever persisted. Averages and counts are computed at que
 
 ---
 
-## 6. Getting Started
+## 6. Mobile Compatibility
+
+The product is used primarily on mobile, so mobile correctness is treated as a functional requirement, not a polish pass. The app has been verified on real Android hardware (not just browser emulation), and includes explicit handling for several real-device issues that don't show up in desktop testing:
+
+- **Correct viewport scaling** — an explicit `viewport` export (`width=device-width`, `viewport-fit=cover`) prevents the page from loading zoomed out or allowing unintended pinch-zoom.
+- **Safe-area support** — `env(safe-area-inset-*)` padding keeps content clear of notches and gesture bars on modern phones.
+- **No horizontal overflow** — global `min-width: 0` and `box-sizing: border-box` rules prevent flex/grid children from silently pushing the page wider than the screen, a common source of "shifted right" layouts on narrow devices.
+- **Android WebView input quirks** — native `<input type="search">` decorations (which Android renders differently from iOS/desktop) are explicitly stripped, while checkboxes and radio buttons are deliberately excluded from that override and styled with `accent-color` instead, so they remain visibly and functionally checkable.
+- **Dark mode safety** — the app does not auto-invert to a system dark theme, since the UI is not designed for it; this avoids the broken-contrast state that shows up when a phone's OS-level dark mode collides with hardcoded light-theme components.
+
+If you're extending this app, keep testing on a real Android device in the loop — several of the above issues were invisible in Chrome DevTools' device emulation and only appeared on physical hardware.
+
+---
+
+## 7. Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -122,6 +136,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app. The server will hot-reload as you edit files.
 
+### Testing on a real phone during development
+
+To test the dev server from a physical phone on the same WiFi network:
+
+1. Find your machine's local IP (`ipconfig` on Windows, look for `IPv4 Address`).
+2. Add it to `next.config.ts`:
+```ts
+   const nextConfig: NextConfig = {
+     allowedDevOrigins: ['<your-local-ip>'],
+   };
+```
+3. On your phone, browse to `http://<your-local-ip>:3000`.
+
+Without this, Next.js's dev server blocks cross-origin hot-reload requests from other devices on the network, which can silently break client-side interactivity (forms, buttons) even though the page loads.
+
 ### Environment Variables
 
 | Variable | Required | Description |
@@ -132,7 +161,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app. The server 
 
 ---
 
-## 7. Project Structure
+## 8. Project Structure
 
 app/
 restaurants/ → Restaurant discovery / listing page
@@ -146,7 +175,7 @@ db/ → One-off migration and seeding scripts
 
 ---
 
-## 8. Deployment
+## 9. Deployment
 
 This project deploys to **Vercel** automatically on every push to `master`.
 
@@ -160,7 +189,7 @@ Vercel picks up the push, builds, and promotes to production automatically. Envi
 
 ---
 
-## 9. Known Constraints & Roadmap
+## 10. Known Constraints & Roadmap
 
 **Current constraints (by design, for a lightweight scope):**
 - No user authentication — reviews are anonymous
@@ -174,7 +203,7 @@ Vercel picks up the push, builds, and promotes to production automatically. Envi
 
 ---
 
-## 10. Learn More
+## 11. Learn More
 
 This project is built on Next.js. Useful references:
 
