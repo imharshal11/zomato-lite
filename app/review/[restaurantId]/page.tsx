@@ -92,6 +92,7 @@ export default function ReviewPage({ params }: { params: Promise<{ restaurantId:
     }
 
     setSuccess(true);
+    router.refresh();
     setTimeout(() => {
       router.push(`/restaurant/${restaurantId}`);
     }, 1500);

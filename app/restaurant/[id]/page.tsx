@@ -1,21 +1,14 @@
 import { neon } from '@neondatabase/serverless';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
 import {
   Header,
   RestaurantHero,
   Card,
-  StarRating,
-  ReviewCard,
   StatusChip,
-  Button,
-  Chip,
   KpiCard,
 } from '@/components';
 import { RestaurantTabs } from './RestaurantTabs';
-import { MenuSectionClient } from './MenuSectionClient';
-import { ReviewsSectionClient } from './ReviewsSectionClient';
 import { getInitials } from '@/lib/utils';
 import { getMenuItemsGroupedByCategoryWithRatings } from '@/lib/restaurants';
 
@@ -45,18 +38,6 @@ interface MenuItemInfo {
   is_veg: boolean;
 }
 
-interface RestaurantData {
-  name: string;
-  cuisine: string;
-  area: string;
-  imageUrl: string | null;
-  averageRating: number | null;
-  totalReviews: number;
-  latestReview: ReviewRow | null;
-  reviews: ReviewRow[];
-  menuItemNames: Map<number, string>;
-}
-
 async function getRestaurantData(id: string) {
   const restaurantId = parseInt(id, 10);
   if (!Number.isInteger(restaurantId) || restaurantId < 1) return null;
@@ -81,15 +62,14 @@ async function getRestaurantData(id: string) {
   const menuItemIds = reviews
     .filter(r => r.menu_item_id !== null)
     .map(r => r.menu_item_id!);
-  
+
   const menuItems = menuItemIds.length > 0 ? await sql`
     SELECT id, name, is_veg FROM menu_items WHERE id = ANY(${menuItemIds})
   ` as MenuItemInfo[] : [];
-  
+
   const menuItemNames = new Map(menuItems.map(m => [m.id, m.name]));
 
   const latestReview = totalReviews > 0 ? reviews[0] : null;
-  const olderReviews = totalReviews > 1 ? reviews.slice(1) : [];
 
   return {
     name: restaurant[0].name,
@@ -99,7 +79,7 @@ async function getRestaurantData(id: string) {
     averageRating,
     totalReviews,
     latestReview,
-    reviews: olderReviews,
+    reviews,
     menuItemNames,
     menuItems,
   };
@@ -113,20 +93,11 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
 
   if (!data) notFound();
 
-  // Convert Map to plain object with STRING keys for client component serialization
   const menuItemNamesObj: Record<string, string> = {};
   for (const [k, v] of data.menuItemNames) {
     menuItemNamesObj[String(k)] = v;
   }
 
-  // Convert menuItems array to plain objects for client component serialization
-  const menuItemsObj = data.menuItems.map(m => ({
-    id: m.id,
-    name: m.name,
-    is_veg: m.is_veg,
-  }));
-
-  // Create data object with menuItemNames as Record<string, string> for client components
   const clientData = {
     ...data,
     menuItemNames: menuItemNamesObj,
