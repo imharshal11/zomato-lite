@@ -20,7 +20,7 @@ export function MenuSectionClient({ menuItemsByCategory, restaurantId }: MenuSec
   );
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 w-full min-w-0 box-border">
       <h2 className="text-lg font-bold text-[#1a1a1a] mb-4 px-4">Menu</h2>
       <MenuFilters
         items={allItems}

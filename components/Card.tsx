@@ -27,7 +27,7 @@ export const Card: FC<CardProps> = ({
 }) => (
   <div
     className={`
-      bg-white rounded-2xl ${bordered ? 'border border-[#f1f0eb]' : ''} 
+      bg-white rounded-2xl ${bordered ? 'border border-[#f1f0eb]' : ''}
       shadow-sm ${hover ? 'hover:shadow-lg transition-shadow duration-200' : ''}
       ${paddingClasses[padding]} ${className}
     `}
@@ -64,7 +64,7 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
       href={`/restaurant/${id}`}
       className="group block bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
     >
-      <div className="relative h-40 w-full bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="relative h-40 w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         <NewBadge createdAt={createdAt} size="sm" overlay />
         <img
           src={displayImage}
@@ -73,17 +73,17 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
           loading="lazy"
         />
       </div>
-      <div className="p-4">
+      <div className="p-4 min-w-0">
         <h3 className="text-lg font-semibold text-[#1a1a1a] truncate group-hover:text-[#e23744] transition-colors">
           {name}
         </h3>
-        <p className="mt-1 text-sm text-[#6b6b6b]">{cuisine} · {area}</p>
-        <div className="mt-3 flex items-center gap-2">
+        <p className="mt-1 text-sm text-[#6b6b6b] truncate">{cuisine} · {area}</p>
+        <div className="mt-3 flex items-center gap-2 flex-wrap min-w-0">
           {averageRating !== null ? (
             <>
               <StarRating rating={averageRating} size="sm" colorByRating />
-              <span className="text-sm font-semibold text-[#1a1a1a] tabular-nums">{averageRating}</span>
-              <span className="text-sm text-[#9ca3af]">({totalReviews} review{totalReviews !== 1 ? 's' : ''})</span>
+              <span className="text-sm font-semibold text-[#1a1a1a] tabular-nums flex-shrink-0">{averageRating}</span>
+              <span className="text-sm text-[#9ca3af] truncate min-w-0">({totalReviews} review{totalReviews !== 1 ? 's' : ''})</span>
             </>
           ) : (
             <span className="text-sm text-[#9ca3af]">No reviews yet</span>

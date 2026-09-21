@@ -24,12 +24,12 @@ export function MenuItemCard({ item, restaurantId }: MenuItemCardProps) {
   );
 
   const ratingDisplay = item.averageRating !== null && item.totalReviews > 0 ? (
-    <div className="flex items-center gap-1.5 mt-2">
+    <div className="flex items-center gap-1.5 mt-2 min-w-0">
       <StarRating rating={item.averageRating} size="sm" colorByRating />
-      <span className="text-sm font-semibold tabular-nums" style={{ color: item.averageRating! <= 2 ? '#dc2626' : item.averageRating! === 3 ? '#f59e0b' : '#16a34a' }}>
+      <span className="text-sm font-semibold tabular-nums flex-shrink-0" style={{ color: item.averageRating! <= 2 ? '#dc2626' : item.averageRating! === 3 ? '#f59e0b' : '#16a34a' }}>
         {item.averageRating}
       </span>
-      <span className="text-sm text-[#9ca3af]">({item.totalReviews})</span>
+      <span className="text-sm text-[#9ca3af] truncate">({item.totalReviews})</span>
     </div>
   ) : (
     <span className="text-sm text-[#9ca3af] mt-2">No reviews yet</span>
@@ -38,7 +38,7 @@ export function MenuItemCard({ item, restaurantId }: MenuItemCardProps) {
   return (
     <Link
       href={`/review/${restaurantId}?dish=${item.id}`}
-      className="bg-white rounded-xl border border-[#f1f0eb] p-4 flex gap-3 hover:border-[#e23744] hover:shadow-md transition-all duration-200"
+      className="bg-white rounded-xl border border-[#f1f0eb] p-4 flex gap-3 hover:border-[#e23744] hover:shadow-md transition-all duration-200 overflow-hidden"
     >
       <div className="relative h-20 w-20 flex-shrink-0 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         <NewBadge createdAt={item.created_at} size="sm" overlay />
@@ -50,10 +50,10 @@ export function MenuItemCard({ item, restaurantId }: MenuItemCardProps) {
         />
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-[#1a1a1a] truncate">{item.name}</h4>
-            {vegIndicator}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1 min-w-0">
+            <h4 className="font-semibold text-[#1a1a1a] truncate min-w-0">{item.name}</h4>
+            <span className="flex-shrink-0">{vegIndicator}</span>
           </div>
           {item.description && (
             <p className="text-sm text-[#6b6b6b] line-clamp-2">{item.description}</p>
@@ -62,14 +62,14 @@ export function MenuItemCard({ item, restaurantId }: MenuItemCardProps) {
             {ratingDisplay}
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2 mt-2">
-          <span className="flex items-center gap-1 text-sm text-[#6b6b6b]">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <div className="flex items-center justify-between gap-2 mt-2 min-w-0">
+          <span className="flex items-center gap-1 text-sm text-[#6b6b6b] truncate min-w-0">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {item.prep_time_minutes} mins
           </span>
-          <span className="text-lg font-bold text-[#1a1a1a] tabular-nums">₹{item.price.toFixed(0)}</span>
+          <span className="text-lg font-bold text-[#1a1a1a] tabular-nums flex-shrink-0">₹{item.price.toFixed(0)}</span>
         </div>
       </div>
     </Link>

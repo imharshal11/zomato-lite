@@ -107,10 +107,10 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
   const isOpen = true;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col w-full overflow-x-hidden">
       <Header title="Zomato Lite" backHref="/restaurants" backLabel="Restaurants" homeLink />
 
-      <main className="max-w-[560px] mx-auto px-4 pb-28 flex-1">
+      <main className="w-full max-w-[560px] mx-auto px-4 pb-28 flex-1 box-border">
         <RestaurantHero
           initials={initials}
           name={data.name}
@@ -120,11 +120,11 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
         />
 
         {/* Header Info + KPI Card - Always visible above tabs */}
-        <Card className="space-y-6">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
+        <Card className="space-y-6 w-full box-border">
+          <div className="flex items-center justify-between gap-3 flex-wrap w-full min-w-0">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-[#1a1a1a] truncate">{data.name}</h1>
-              <p className="mt-1 text-sm text-[#6b6b6b]">{data.cuisine} · {data.area}</p>
+              <p className="mt-1 text-sm text-[#6b6b6b] truncate">{data.cuisine} · {data.area}</p>
             </div>
             <StatusChip label={isOpen ? 'Open' : 'Closed'} status={isOpen ? 'open' : 'closed'} />
           </div>

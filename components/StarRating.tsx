@@ -43,7 +43,7 @@ export const StarRating: FC<StarRatingProps> = ({
   const color = colorByRating ? getRatingColor(rating) : (filledColor ?? '#e23744');
 
   return (
-    <span className="flex items-center gap-0.5" aria-label={ariaLabel ?? `${rating} out of 5 stars`}>
+    <span className="flex items-center gap-0.5 flex-shrink-0" aria-label={ariaLabel ?? `${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((star) => {
         if (star <= fullStars) {
           return (
@@ -54,8 +54,8 @@ export const StarRating: FC<StarRatingProps> = ({
         }
         if (star === fullStars + 1 && hasHalf) {
           return (
-            <span key={star} className={sizeClasses[size]} style={{ color }}>
-              ½
+            <span key={star} className={sizeClasses[size]} style={{ color, opacity: 0.5 }}>
+              ★
             </span>
           );
         }
@@ -79,9 +79,9 @@ export interface StarPickerProps {
 }
 
 const pickerSizes = {
-  sm: 'w-11 h-11 text-lg',
-  md: 'w-12 h-12 text-xl',
-  lg: 'w-16 h-16 text-2xl',
+  sm: 'w-10 h-10 text-base',
+  md: 'w-11 h-11 text-lg',
+  lg: 'w-12 h-12 text-xl',
 };
 
 export const StarPicker: FC<StarPickerProps> = ({
@@ -96,8 +96,8 @@ export const StarPicker: FC<StarPickerProps> = ({
   const activeColor = displayRating ? getRatingColor(displayRating) : '#e23744';
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex gap-3" role="radiogroup" aria-label={label}>
+    <div className="flex flex-col items-center gap-2 w-full">
+      <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center w-full" role="radiogroup" aria-label={label}>
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = rating !== null && star <= rating;
           const isHovered = hoverRating !== null && star <= hoverRating;
@@ -105,7 +105,7 @@ export const StarPicker: FC<StarPickerProps> = ({
           const starColor = isActive ? getRatingColor(star) : '#d1d5db';
           const borderColor = isActive ? getRatingColor(star) : '#e5e7eb';
           const bgColor = isActive ? `${starColor}15` : 'transparent'; // 10% opacity
-          
+
           return (
             <button
               key={star}
@@ -115,7 +115,7 @@ export const StarPicker: FC<StarPickerProps> = ({
               onClick={() => onRatingChange(star)}
               onMouseEnter={() => onHoverChange(star)}
               onMouseLeave={() => onHoverChange(null)}
-              className={`flex items-center justify-center rounded-xl border-2 transition-all duration-150 ${pickerSizes[size]}`}
+              className={`flex items-center justify-center rounded-xl border-2 transition-all duration-150 flex-shrink-0 ${pickerSizes[size]}`}
               style={{
                 color: starColor,
                 borderColor,
@@ -129,7 +129,7 @@ export const StarPicker: FC<StarPickerProps> = ({
           );
         })}
       </div>
-      <p className="text-sm font-medium min-h-[1.25rem] transition-colors duration-150" style={{ color: activeColor }}>
+      <p className="text-sm font-medium min-h-[1.25rem] text-center transition-colors duration-150" style={{ color: activeColor }}>
         {displayRating ? RATING_LABELS[displayRating] : 'Tap to rate'}
       </p>
     </div>

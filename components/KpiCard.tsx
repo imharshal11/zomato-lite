@@ -42,7 +42,7 @@ export const KpiCard: FC<KpiCardProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-2xl border border-[#f1f0eb] shadow-sm ${padding} ${gap} transition-all duration-200 hover:shadow-md`}
+      className={`bg-white rounded-2xl border border-[#f1f0eb] shadow-sm ${padding} ${gap} transition-all duration-200 hover:shadow-md w-full box-border`}
       style={{
         borderLeft: `4px solid ${accentColor}`,
       }}

@@ -51,7 +51,7 @@ export function ReviewsSectionClient({ data, restaurantId }: ReviewsSectionClien
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full min-w-0 box-border">
       <h2 className="text-lg font-bold text-[#1a1a1a] mb-4 px-4">Reviews & Ratings</h2>
       {/* Filters */}
       <ReviewFilters
