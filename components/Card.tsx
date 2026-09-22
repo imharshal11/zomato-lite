@@ -62,14 +62,14 @@ export const RestaurantCard: FC<RestaurantCardProps> = ({
   return (
     <Link
       href={`/restaurant/${id}`}
-      className="group block bg-white rounded-2xl border border-[#f1f0eb] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
+      className="group block bg-white rounded-2xl border border-[#f1f0eb] hover:border-[#e23744] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
     >
-      <div className="relative h-40 w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+      <div className="relative h-40 w-full bg-white overflow-hidden">
         <NewBadge createdAt={createdAt} size="sm" overlay />
         <img
           src={displayImage}
           alt=""
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
       </div>
